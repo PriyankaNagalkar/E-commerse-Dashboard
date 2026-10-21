@@ -1,8 +1,7 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import Header from "./Header"
 
-function Login(props) {
+function Protected(props) {
     let Cmp = props.Component;
 
     const navigate = useNavigate();
@@ -18,4 +17,4 @@ function Login(props) {
         </div>
     )
 }
-export default Login
+export default Protected

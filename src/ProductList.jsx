@@ -1,19 +1,32 @@
 import { useEffect, useState } from "react";
 import Header from "./Header";
 import { Table } from "react-bootstrap";
+import { useproducts } from "./ProductContext";
 
 function ProductList() {
 
-    const [data, setData] = useState([])
+    const { products, setProducts, loaded, setLoaded } = useproducts()
 
     useEffect(() => {
         const fetchProduct = async () => {
-            let result = await fetch("https://dummyjson.com/products")
-            result = await result.json()
-            setData(result.products)
+            try {
+                let result = await fetch("https://dummyjson.com/products")
+                const response = await result.json()
+
+                setProducts((prev) => {
+                    const filterList = [...prev, ...response.products];
+
+                    return Array.from(new Map(
+                        filterList.map((item) => [item.id, item])
+                    ).values())
+                })
+                setLoaded(true)
+            } catch (err) {
+                alert("Failed to load products", err)
+            }
         }
         fetchProduct()
-    }, [])
+    }, [loaded, setProducts, setLoaded])
 
     return (
         <div>
@@ -33,11 +46,11 @@ function ProductList() {
                     </thead>
                     <tbody>
                         {
-                            data.map((item) => (
-                                <tr>
+                            products && products.map((item, key) => (
+                                <tr key={item.id}>
                                     <td>{item.id}</td>
                                     <td>{item.title}</td>
-                                    <td><img className="itemImg" src={item.images[0]}></img></td>
+                                    <td><img className="itemImg" src={item.images?.[0]} alt="item.title"></img></td>
                                     <td>{item.description}</td>
                                     <td>{item.price}</td>
                                 </tr>
