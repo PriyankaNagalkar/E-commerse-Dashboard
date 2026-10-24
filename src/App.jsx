@@ -7,6 +7,7 @@ import AddProduct from './AddProduct'
 import Protected from './Protected'
 import ProductList from './ProductList'
 import { ProductsProvider } from './ProductContext'
+import SearchProduct from './SearchProduct'
 
 import './App.css'
 import { Button } from 'react-bootstrap'
@@ -20,8 +21,9 @@ function App() {
           <Routes>
             <Route path='/login' element={<Login />}></Route>
             <Route path='/register' element={<Register />}></Route>
-            <Route path='/update' element={<Protected Component={UpdateProduct} />}></Route>
+            <Route path='/update/:id' element={<Protected Component={UpdateProduct} />}></Route>
             <Route path='/add' element={<Protected Component={AddProduct} />}></Route>
+            <Route path='/search' element={<Protected Component={SearchProduct} />}></Route>
             <Route path='/' element={<Protected Component={ProductList} />}></Route>
           </Routes>
         </BrowserRouter>

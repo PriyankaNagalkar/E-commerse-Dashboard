@@ -9,3 +9,7 @@ padding-left: 20px;
 .itemImg{
     width: 90px;
 }
+
+.deleteBtn, .editData{
+    cursor: pointer;
+}

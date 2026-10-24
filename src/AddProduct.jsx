@@ -25,8 +25,9 @@ function AddProduct() {
         formData.append("name", name)
         formData.append("price", price)
         formData.append("description", description)
-        formData.append("id", Math.random().toString(36).substring(2, 15))
+        // formData.append("id", Math.random().toString(36).substring(2, 15))
         // formData.append("id", crypto.randomUUID())
+        formData.append("id", Math.floor(Math.random() * 1000000) + 1)
 
         setLoading(true)
 
@@ -62,9 +63,9 @@ function AddProduct() {
             <div className="col-sm-6 offset-sm-3">
                 <br />
                 <input type="text" className="form-control" placeholder="Name" onChange={(e) => setName(e.target.value)} /><br />
-                <input type="file" className="form-control" accept="image/*" placeholder="File" onChange={(e) => setFile(e.target.files[0])} /><br />
                 <input type="text" className="form-control" placeholder="Price" onChange={(e) => setPrice(e.target.value)} /><br />
                 <input type="text" className="form-control" placeholder="Description" onChange={(e) => setDescription(e.target.value)} /><br />
+                <input type="file" className="form-control" accept="image/*" placeholder="File" onChange={(e) => setFile(e.target.files[0])} /><br />
                 <button onClick={addProduct} disabled={loading}>
                     {loading ? "Adding..." : "Add Product"}
                 </button>

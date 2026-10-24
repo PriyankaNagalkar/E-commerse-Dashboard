@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import Header from "./Header";
 import { Table } from "react-bootstrap";
 import { useproducts } from "./ProductContext";
+import { Pencil, Trash } from 'react-bootstrap-icons'
+import { Link } from "react-router-dom";
 
 function ProductList() {
 
@@ -14,7 +16,7 @@ function ProductList() {
                 const response = await result.json()
 
                 setProducts((prev) => {
-                    const filterList = [...prev, ...response.products];
+                    const filterList = [...prev];
 
                     return Array.from(new Map(
                         filterList.map((item) => [item.id, item])
@@ -27,6 +29,16 @@ function ProductList() {
         }
         fetchProduct()
     }, [loaded, setProducts, setLoaded])
+
+    async function deleteItem(id) {
+        setProducts((prev) =>
+            prev.filter((product) => product.id !== id)
+        );
+    }
+
+    async function updateData(id) {
+        console.log(id)
+    }
 
     return (
         <div>
@@ -42,6 +54,7 @@ function ProductList() {
                             <th>Image</th>
                             <th>Description</th>
                             <th>Price</th>
+                            <th>Operation</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -53,6 +66,8 @@ function ProductList() {
                                     <td><img className="itemImg" src={item.images?.[0]} alt="item.title"></img></td>
                                     <td>{item.description}</td>
                                     <td>{item.price}</td>
+                                    <td><Trash className="deleteBtn" onClick={() => { deleteItem(item.id) }} /></td>
+                                    <td><Link to={"update/"+item.id}><Pencil className="editData" onClick={() => {updateData(item.id)}}/></Link></td>
                                 </tr>
                             ))
                         }
