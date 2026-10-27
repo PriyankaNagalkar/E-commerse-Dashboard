@@ -2,7 +2,7 @@ import { useState } from "react"
 import Header from "./Header"
 import { Table } from "react-bootstrap"
 import { Trash } from 'react-bootstrap-icons'
-import { useproducts } from "./ProductContext";
+import { useproducts } from "../Context/ProductContext";
 
 function SearchProduct() {
     const [data, setData] = useState([])
