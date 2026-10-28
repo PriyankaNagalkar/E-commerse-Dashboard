@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { Alert, Button, Col, Modal, Row } from "react-bootstrap"
-import { Pencil, Trash, StarFill, Search, BoxSeam } from "react-bootstrap-icons"
+import { Pencil, Trash, StarFill, Search, BoxSeam, Heart, Handbag } from "react-bootstrap-icons"
 import Header from "./Header"
 import { useproducts } from "../Context/ProductContext"
 
@@ -173,6 +173,8 @@ function ProductList() {
                                             {item.rating && (
                                                 <span className="rating"><StarFill size={13} /> {item.rating}</span>
                                             )}
+                                            <Heart />
+                                            <span><Handbag /></span>
                                         </div>
                                     </div>
                                 </div>

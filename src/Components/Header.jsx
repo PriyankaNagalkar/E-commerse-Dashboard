@@ -1,6 +1,6 @@
 import { Navbar, Nav, NavDropdown } from 'react-bootstrap'
 import { useNavigate, useLocation, Link, NavLink } from 'react-router-dom'
-import { HouseHeartFill, PersonCircle, BoxArrowRight } from 'react-bootstrap-icons'
+import { HouseHeartFill, PersonCircle, BoxArrowRight, Heart, Minecart } from 'react-bootstrap-icons'
 
 
 function Header(props) {
@@ -36,6 +36,8 @@ function Header(props) {
                                 <NavLink to="/add">Add Product</NavLink>
                                 <NavLink to="/update">Update Product</NavLink>
                                 <NavLink to="/search">Search Product</NavLink>
+                                <NavLink to="/whishlist"><Heart /></NavLink>
+                                <NavLink to="/cart"><Minecart /></NavLink>
                             </> :
                             <>
                                 <NavLink to="/home"><HouseHeartFill className='homeIcon' /></NavLink>
