@@ -12,6 +12,7 @@ import SearchProduct from './Components/SearchProduct'
 import Profile from './Components/Profile'
 import Whishlist from './Components/Whishlist'
 import Cart from './Components/Cart'
+import Orders from './Components/Orders'
 
 
 import './App.css'
@@ -21,7 +22,7 @@ function App() {
 
   return (
     <div className='app'>
-    <ProductsProvider>
+      <ProductsProvider>
         <BrowserRouter>
           <Routes>
             <Route path='/home' element={<Home />}></Route>
@@ -31,8 +32,9 @@ function App() {
             <Route path='/add' element={<Protected Component={AddProduct} />}></Route>
             <Route path='/search' element={<Protected Component={SearchProduct} />}></Route>
             <Route path='/profile' element={<Protected Component={Profile} />} />
-               <Route path='/whishlist' element={<Protected Component={Whishlist} />} />
-                <Route path='/cart' element={<Protected Component={Cart} />} />
+            <Route path='/wishlist' element={<Protected Component={Whishlist} />} />
+            <Route path='/cart' element={<Protected Component={Cart} />} />
+            <Route path="/orders" element={<Protected Component={Orders}></Protected>} />
             <Route path='/' element={<Protected Component={ProductList} />}></Route>
           </Routes>
         </BrowserRouter>

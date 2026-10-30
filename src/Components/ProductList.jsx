@@ -1,19 +1,24 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { Alert, Button, Col, Modal, Row } from "react-bootstrap"
-import { Pencil, Trash, StarFill, Search, BoxSeam, Heart, Handbag } from "react-bootstrap-icons"
+import { Alert, Button, Col, Modal, Row, Spinner, Toast, ToastContainer } from "react-bootstrap"
+import { Pencil, Trash, StarFill, Search, BoxSeam, Heart, HeartFill, Handbag, Dash, Plus } from "react-bootstrap-icons"
 import Header from "./Header"
 import { useproducts } from "../Context/ProductContext"
+import { useInfiniteScroll } from "../hooks/useInfiniteScroll"
 
 function ProductList() {
-    const { products, setProducts, loaded, setLoaded } = useproducts()
+    const PAGE_SIZE = 8;
+    const { products, setProducts, loaded, setLoaded, wishlist,
+        toggleWishlist, addToCart, isWished, isInCart, cart, updateCartQuantity } = useproducts()
 
+    const [toast, setToast] = useState("")
     const [query, setQuery] = useState("")
     const [sort, setSort] = useState("default")
     const [toDelete, setToDelete] = useState(null)       // product waiting for confirmation
     const [removingId, setRemovingId] = useState(null)   // product playing its exit animation
     const [error, setError] = useState("")
     const [attempt, setAttempt] = useState(0)            // bumped by the Retry button
+    const [popId, setPopId] = useState(null)
 
     // load once; the guard stops refetching (and deleted items coming back)
     useEffect(() => {
@@ -38,6 +43,17 @@ function ProductList() {
         return () => controller.abort()
     }, [loaded, attempt, setProducts, setLoaded])
 
+    function handleWishlist(item) {
+        setToast(isWished(item.id) ? "Removed from wishlist" : "Added to wishlist")
+        toggleWishlist(item)
+        setPopId(item.id)                       // triggers the pop animation once
+        setTimeout(() => setPopId(null), 450)
+    }
+
+    function handleAddToCart(item) {
+        addToCart(item)
+        setToast(`"${item.title}" added to cart`)
+    }
     // search + sort (recalculated only when something it uses changes)
     const visible = useMemo(() => {
         const q = query.trim().toLowerCase()
@@ -49,6 +65,8 @@ function ProductList() {
 
         return list
     }, [products, query, sort])
+
+    const { visibleItems, hasMore, sentinelRef, loadingMore } = useInfiniteScroll(visible, PAGE_SIZE, `${query}|${sort}`, 800)
 
     async function confirmDelete() {
         const item = toDelete
@@ -136,51 +154,100 @@ function ProductList() {
 
                 {/* product cards */}
                 {loaded && visible.length > 0 && (
-                    <Row xs={1} sm={2} lg={3} xl={4} className="g-4">
-                        {visible.map((item, index) => (
-                            <Col key={item.id}>
-                                <div
-                                    className={`product-card ${removingId === item.id ? "removing" : ""}`}
-                                    style={{ "--i": Math.min(index, 12) }}
-                                >
-                                    <div className="product-img-wrap">
-                                        {item.isLocal && <span className="new-badge">New</span>}
+                    <>
+                        <Row xs={1} sm={2} lg={3} xl={4} className="g-4">
+                            {visibleItems.map((item, index) => {
+                                const qty = cart.find((c) => c.id === item.id)?.qty
 
-                                        <img src={item.images?.[0] || item.thumbnail} alt={item.title} loading="lazy" />
+                                return (
+                                    <Col key={item.id}>
+                                        <div
+                                            className={`product-card ${removingId === item.id ? "removing" : ""}`}
+                                            style={{ "--i": Math.min(index, 12) }}
+                                        >
+                                            <div className="product-img-wrap">
+                                                {item.isLocal && <span className="new-badge">New</span>}
 
-                                        <div className="card-actions">
-                                            <Link to={`/update/${item.id}`} className="icon-btn" aria-label={`Edit ${item.title}`}>
-                                                <Pencil />
-                                            </Link>
-                                            <button
-                                                type="button"
-                                                className="icon-btn danger"
-                                                aria-label={`Delete ${item.title}`}
-                                                onClick={() => setToDelete(item)}
-                                            >
-                                                <Trash />
-                                            </button>
+                                                <img src={item.images?.[0] || item.thumbnail} alt={item.title} loading="lazy" />
+
+                                                <div className="card-actions">
+                                                    <Link to={`/update/${item.id}`} className="icon-btn" aria-label={`Edit ${item.title}`}>
+                                                        <Pencil />
+                                                    </Link>
+                                                    <button
+                                                        type="button"
+                                                        className="icon-btn danger"
+                                                        aria-label={`Delete ${item.title}`}
+                                                        onClick={() => setToDelete(item)}
+                                                    >
+                                                        <Trash />
+                                                    </button>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className={`wish-btn ${isWished(item.id) ? "active" : ""} ${popId === item.id ? "pop" : ""}`}
+                                                    aria-label={isWished(item.id) ? "Remove from wishlist" : "Add to wishlist"}
+                                                    aria-pressed={isWished(item.id)}
+                                                    onClick={() => handleWishlist(item)}
+                                                >
+                                                    {isWished(item.id) ? <HeartFill /> : <Heart />}
+                                                </button>
+                                            </div>
+
+                                            <div className="product-body">
+                                                {item.category && <span className="category">{item.category}</span>}
+                                                <h3 className="product-title">{item.title}</h3>
+                                                <p className="product-desc">{item.description}</p>
+
+                                                <div className="product-footer">
+                                                    <div className="price-row">
+                                                        <span className="price">${Number(item.price).toFixed(2)}</span>
+                                                        {item.rating > 0 && (
+                                                            <span className="rating-pill" title={`${item.rating} out of 5`}>
+                                                                <StarFill size={12} />
+                                                                {Number(item.rating).toFixed(1)}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    {qty ? (
+                                                        <div className="qty-stepper">
+                                                            <button type="button" aria-label="Decrease quantity" onClick={() => updateCartQuantity(item.id, -1)}>
+                                                                <Dash />
+                                                            </button>
+                                                            <span>{qty} in cart</span>
+                                                            <button type="button" aria-label="Increase quantity" onClick={() => updateCartQuantity(item.id, 1)}>
+                                                                <Plus />
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <button type="button" className="cart-btn" onClick={() => handleAddToCart(item)}>
+                                                            <Handbag /> Add to Cart
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-
-                                    <div className="product-body">
-                                        {item.category && <span className="category">{item.category}</span>}
-                                        <h3 className="product-title">{item.title}</h3>
-                                        <p className="product-desc">{item.description}</p>
-
-                                        <div className="product-footer">
-                                            <span className="price">${Number(item.price).toFixed(2)}</span>
-                                            {item.rating && (
-                                                <span className="rating"><StarFill size={13} /> {item.rating}</span>
-                                            )}
-                                            <Heart />
-                                            <span><Handbag /></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </Col>
-                        ))}
-                    </Row>
+                                    </Col>
+                                )
+                            }
+                            )}
+                        </Row><br />
+                        {loadingMore && (
+                            <Row xs={1} sm={2} lg={3} xl={4} className="g-4 mt-1">
+                                {Array.from({ length: 4 }).map((_, i) => (
+                                    <Col key={i}><div className="skeleton-card" /></Col>
+                                ))}
+                            </Row>
+                        )}
+                        {hasMore ? (
+                            <div ref={sentinelRef} className="scroll-sentinel">
+                                <Spinner animation="border" size="sm" /> Loading more products...
+                            </div>
+                        ) : (
+                            visible.length > PAGE_SIZE && <p className="scroll-end">You've seen it all ✨</p>
+                        )}
+                    </>
                 )}
 
                 {/* empty state */}
@@ -205,6 +272,12 @@ function ProductList() {
                     <Button variant="danger" onClick={confirmDelete}>Delete</Button>
                 </Modal.Footer>
             </Modal>
+
+            <ToastContainer position="bottom-end" className="p-3" style={{ position: "fixed" }}>
+                <Toast show={!!toast} onClose={() => setToast("")} delay={1800} autohide bg="dark">
+                    <Toast.Body className="text-white">{toast}</Toast.Body>
+                </Toast>
+            </ToastContainer>
         </div>
     )
 }
